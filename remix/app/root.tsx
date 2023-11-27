@@ -1,6 +1,9 @@
 import { cssBundleHref } from "@remix-run/css-bundle";
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import {
+  json,
+  type LinksFunction,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -8,22 +11,30 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
-
-import { getUser } from "~/session.server";
 
 import "@mantine/core/styles.css";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 
+import styles from "./cms/contentful/styles.css";
+import i18next from "~/i18next.server";
+import { createContext } from "react";
+import { useContext, useState } from "react";
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: "stylesheet", href: styles },
 ];
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  return json({ user: await getUser(request) });
-};
+// This might actually only work when deployed. I'll figure this out.
+/*export async function loader({ request }: LoaderFunctionArgs) {
+  let locale = await i18next.getLocale(request);
+  return json({ locale });
+}*/
 
 export default function App() {
+  //let { locale } = useLoaderData<typeof loader>();
+
   return (
     <html lang="en" className="h-full">
       <head>
@@ -33,14 +44,36 @@ export default function App() {
         <Links />
         <ColorSchemeScript />
       </head>
-      <body className="h-full">
+      <body className="h-full" style={{ border: "1px solid gold" }}>
         <MantineProvider>
-          <Outlet />
-          <ScrollRestoration />
-          <Scripts />
-          <LiveReload />
+          <LocaleProvider>
+            <Outlet />
+            <ScrollRestoration />
+            <Scripts />
+            <LiveReload />
+          </LocaleProvider>
         </MantineProvider>
       </body>
     </html>
   );
 }
+
+// Temporary context to test CMS translations
+
+export const LocaleContext = createContext({
+  locale: "en",
+  setLocale: (locale: string) => {},
+});
+
+export const LocaleProvider = ({ children }: { children: React.ReactNode }) => {
+  const [locale, setLocale] = useState<string>("en");
+
+  const value = {
+    locale,
+    setLocale,
+  };
+
+  return (
+    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+  );
+};

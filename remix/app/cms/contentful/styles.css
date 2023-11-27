@@ -1,0 +1,3 @@
+.customTable > tr:first-child > td p {
+  font-size: 24px;
+}

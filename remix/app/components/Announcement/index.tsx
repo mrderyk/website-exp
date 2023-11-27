@@ -15,9 +15,5 @@ const announcementStyles = {
   color: "#000000",
   fontWeight: 700,
   textAlign: "center" as "center",
-  position: "fixed" as "fixed",
   width: "100%",
-  top: 0,
-  left: 0,
-  zIndex: 9999,
 };
